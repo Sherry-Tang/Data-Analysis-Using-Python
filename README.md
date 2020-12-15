@@ -18,7 +18,7 @@ Deep learning model generate summary based on the semantic understanding of orig
 - Step 1 - Load the local txt file, you can also integrate different python packages such as “Fransc” to transform other source of docuent into text file.
 - Step 2 - Initiate the model, I used t5-large here. There are more advanced T5 versions such as t5-3b and t5-11b which will give you better performance, but they will also take a lot of RAM, so make sure that you have enough space, and it will also take a longer time.
 - Step 3 -Load tokenizer
-- Step 4 - Define the instruction by adding the prefix"Summarize", You can replace "Summarize" by "translate English to other languages:" to translate the summary into different language
+- Step 4 - Define the instruction by adding the prefix"Summarize", You can replace`Summarize` by`translate English to other languages:` to translate the summary into different language
 - Step 5 - Encode text
 - Step 6 - Generate summary
 - Step 7 - Decoder the summary and print it out
