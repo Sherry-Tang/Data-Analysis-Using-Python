@@ -1,10 +1,10 @@
 # Data-Analysis-Using-Python
 This repository stores python project that I did\
-**1. Microsoft Malware Detection Prediction**\
+## 1. Microsoft Malware Detection Prediction**\
 datasource: kaggle\
 model used: xgboost<br/> 
 
-# T5 Transformer VS TextRank Algorithm
+## 2. T5 Transformer VS TextRank Algorithm
 
 ### Traditional Approach with NLTK
 Teaditianal Approach generate summarization by generating similarity matrix and ranking all sentences by texkrank algorithm, and pick top sentences
