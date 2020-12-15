@@ -8,7 +8,7 @@ model used: xgboost<br/>
 
 ### Traditional Approach with NLTK
 Teaditianal Approach generate summarization by generating similarity matrix and ranking all sentences by texkrank algorithm, and pick top sentences
-- Step 1 -  Read text anc split it
+- Step 1 -  Read text and split it
 - Step 2 - Generate Similary Martix across sentences
 - Step 3 - Rank sentences in similarity martix
 - Step 4 - Sort the rank and pick top sentences
