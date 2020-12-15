@@ -4,7 +4,7 @@ Hi! Welcome to my github :wink:, This repository stores python project that I di
 datasource: kaggle\
 model used: xgboost<br/> 
 
-## 2. T5 Transformer VS TextRank Algorithm
+## 2. Text Summarization - T5 Transformer VS TextRank 
 
 ### Traditional Approach with NLTK
 Teaditianal Approach generate summarization by generating similarity matrix and ranking all sentences by texkrank algorithm, and pick top sentences
