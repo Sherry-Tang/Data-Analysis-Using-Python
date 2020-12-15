@@ -7,7 +7,7 @@ model used: xgboost<br/>
 ## 2. Text Summarization - T5 Transformer VS TextRank 
 
 ### Traditional Approach with NLTK
-Teaditianal Approach generate summarization by generating similarity matrix and ranking all sentences by texkrank algorithm, and pick top sentences
+Teaditianal Approach generate summarization by generating similarity matrix and ranking all sentences by textrank algorithm, and pick top sentences
 - Step 1 -  Read text and split it
 - Step 2 - Generate similarity martix across sentences
 - Step 3 - Rank sentences in similarity martix
