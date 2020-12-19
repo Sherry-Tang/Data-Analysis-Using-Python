@@ -31,6 +31,7 @@ Analysis Techniques and Methodologies:
 - Statistic
 - Exploratory Data Analysis
 - Clustering
+- Data Visualization
 
 
 
