@@ -24,5 +24,16 @@ Deep learning model generate summary based on the semantic understanding of orig
 - Step 7 - Decoder the summary and print it out
 ### T5 is a good tool to improve your daily work efficiency! 😊
 
+## 3. Hennepin County SNAP Program Performance Measure and Strategies  
+Projection Description:
+Supplemental Nutrition Assistance Program (SNAP) provides nutrition benefits to supplement the food budget of needy families so they can purchase healthy food and move towards self-sufficiency. The project aimed at measuring the SNAP coverage rate in different dimensions and provide insights into the analysis results.   
+Analysis Techniques and Methodologies:
+- Statistic
+- Exploratory Data Analysis
+- Clustering
+
+
+
+
 Welcome to reach out if you have any questions.
  
