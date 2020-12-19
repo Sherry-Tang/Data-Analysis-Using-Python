@@ -36,5 +36,5 @@ Analysis Techniques and Methodologies:
 
 
 
-## Welcome to reach out if you have any questions.
+## Welcome to reach out if you have any questions. `sherrytang0406@outlook.com`
  
