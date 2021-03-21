@@ -1,0 +1,1 @@
+DROP VIEW IF EXISTS JXB_QZJXDb.检查,检测,检查2,检测2;

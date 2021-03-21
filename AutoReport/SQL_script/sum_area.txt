@@ -1,0 +1,43 @@
+select A.区域  as '各区（县、市）',E.区域承保设备 as '承保起重机械（台）',
+A.在保总包单位 as '投保企业（家）' ,B.在建项目 as '承保建筑工地项目（个）',C.新增总包单位 as '新增投保企业（家）',D.当季新项目 as '新增建筑工地项目（个）'from
+( 
+select right(ProjectLocationText,len(ProjectLocationText)-8) 区域, count(distinct e.EnterpriseName) 在保总包单位
+from HoistingPolicy hois 
+left join Enterprise e on hois.EnterpriseId = e.Id
+where hois.EndDate>= @EndDate and hois.BeginDate< @EndDate and hois.IsDeleted=0 
+and hois.IsPolicyFileUploaded=1 and CheckState='PASS'
+and( hois.IsRemoved=0 or hois.IsRemoved is null or (IsRemoved=1 and RemoveTime>= @EndDate))
+group by ProjectLocationText
+) A
+full join
+(
+select right(ProjectLocationText,len(ProjectLocationText)-8) 区域, count(distinct ProjectName) 在建项目
+from HoistingPolicy hois 
+where hois.EndDate>= @EndDate and hois.BeginDate< @EndDate and hois.IsDeleted=0 
+and hois.IsPolicyFileUploaded=1 and CheckState='PASS'
+and( hois.IsRemoved=0 or hois.IsRemoved is null or (IsRemoved=1 and RemoveTime>= @EndDate))
+group by ProjectLocationText
+) B on B.区域 =A.区域
+full join
+(
+select right(ProjectLocationText,len(ProjectLocationText)-8) 区域,count(distinct e.EnterpriseName)新增总包单位 from HoistingPolicy a left join Enterprise e on a.EnterpriseId = e.Id
+where a.ProjectName not in 
+(select ProjectName from HoistingPolicy where BeginDate<@BeginDate and a.IsDeleted=0 and a.IsPolicyFileUploaded=1 and a.CheckState='PASS')
+and BeginDate>=@BeginDate and BeginDate<@EndDate and a.IsDeleted=0 and a.IsPolicyFileUploaded=1 and a.CheckState='PASS'
+group by ProjectLocationText) C on C.区域 =A.区域
+full join
+(
+select right(ProjectLocationText,len(ProjectLocationText)-8) 区域, count(DISTINCT ProjectName)当季新项目 from HoistingPolicy where ProjectName not in 
+(select ProjectName from HoistingPolicy where BeginDate<@BeginDate and IsDeleted=0 and IsPolicyFileUploaded=1 and CheckState='PASS')
+and BeginDate>=@BeginDate and BeginDate<@EndDate and IsDeleted=0 and IsPolicyFileUploaded=1 and CheckState='PASS'
+group by ProjectLocationText
+) D on D.区域 = A.区域 
+full join
+(select   right(ProjectLocationText,len(ProjectLocationText)-8)区域,count(hois.ProjectLocationText) 区域承保设备
+from HoistingPolicy hois 
+where hois.IsDeleted=0 and hois.IsPolicyFileUploaded=1 and CheckState='PASS' and( hois.IsRemoved=0 or hois.IsRemoved is null or (IsRemoved=1 and RemoveTime>=@EndDate))
+and hois.EndDate>=@EndDate and hois.BeginDate<@EndDate
+group by hois.ProjectLocationText
+) E on E.区域 = A.区域 
+order by '承保起重机械（台）' desc
+

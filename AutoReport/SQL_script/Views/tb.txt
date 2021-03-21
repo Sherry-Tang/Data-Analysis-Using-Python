@@ -1,0 +1,9 @@
+CREATE VIEW t AS
+select h.PropertyRightNo as 产权备案编号,
+h.Id,
+ROW_NUMBER()over(partition by PropertyRightNo order by PolicyFileUploadedTime desc ) rw 
+from 
+HoistingPolicy h
+where IsPolicyFileUploaded=1
+and IsDeleted=0
+and CheckState='PASS'

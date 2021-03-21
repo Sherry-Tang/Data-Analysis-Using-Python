@@ -1,0 +1,18 @@
+SELECT T.CorrectName AS 安装单位,
+       RIGHT(H.ProjectLocationText,len(H.ProjectLocationText)-8)AS 地区,
+	  (SELECT COUNT(*) FROM HoistingPolicy AS H1 LEFT JOIN Correct.dbo.Install AS T1 on T1.SystemName=H1.InstallationEnterprise WHERE H1.BeginDate>=@BeginDate AND H1.BeginDate<@EndDate AND (H1.IsInstallation IS NULL OR H1.IsInstallation=0) AND H1.IsDeleted=0 AND H1.IsPolicyFileUploaded=1 AND H1.CheckState='PASS' AND H1.RelatedId IS NULL AND  T1.CorrectName= T.CorrectName AND H1.ProjectLocationText=H.ProjectLocationText) AS 安装设备数,
+	  (SELECT COUNT(DISTINCT 保单ID) FROM 检查1 AS JC WHERE JC.rk_台数=1 AND JC.小项风险标识='高风险' AND NOT EXISTS(SELECT 1 FROM TisInspectionDetailInfo AS T1 WHERE T1.TisInspectionInfoId=JC.检查ID AND T1.InspectionCheckTime2<@BeginDate AND T1.InspectionResult='高风险') AND JC.安装单位= T.CorrectName AND JC.区域=H.ProjectLocationText) AS 高风险台数,
+	  (SELECT COUNT(DISTINCT 检查ID) FROM 检查1 AS JC WHERE JC.rk_台次=1 AND JC.小项风险标识='高风险' AND NOT EXISTS(SELECT 1 FROM TisInspectionDetailInfo AS T1 WHERE T1.TisInspectionInfoId=JC.检查ID AND T1.InspectionCheckTime2<@BeginDate AND T1.InspectionResult='高风险')AND JC.安装单位= T.CorrectName AND JC.区域=H.ProjectLocationText) AS 高风险台次,
+	  (SELECT COUNT(DISTINCT JC.保单ID) FROM 检查2 AS JC 
+	          LEFT JOIN (SELECT TisInspectionInfoId AS Id,MIN(InspectionCheckTime2) AS min_check FROM TisInspectionDetailInfo GROUP BY TisInspectionInfoId) AS D ON D.Id=JC.检查ID 
+              LEFT JOIN (SELECT JC1.小项风险标识,JC1.保单Id FROM 检查1 AS JC1 WHERE JC1.rk_台数=1 AND JC1.小项风险标识='高风险' AND NOT EXISTS(SELECT 1 FROM TisInspectionDetailInfo AS T1 WHERE T1.TisInspectionInfoId=JC1.检查ID AND T1.InspectionCheckTime2<@BeginDate AND T1.InspectionResult='高风险')) AS D2 ON D2.保单Id=JC.保单Id 
+			  LEFT JOIN HoistingPolicy AS H1 ON H1.Id=JC.保单ID
+			  WHERE D.min_check>=@BeginDate AND JC.rk_台数=1 AND JC.小项风险标识='高风险' AND  JC.安装单位= T.CorrectName AND H1.ProjectLocationText=H.ProjectLocationText  AND D2.小项风险标识='高风险' AND (H1.IsRemoved=0 OR H1.IsRemoved IS NULL OR (H1.IsRemoved=1 AND H1.RemoveTime>=@EndDate))) AS 现存高风险台数,
+	  (SELECT COUNT(DISTINCT JC.检查ID) FROM 检查1 AS JC
+              LEFT JOIN (SELECT JC1.小项风险标识,JC1.检查ID FROM 检查2 AS JC1 WHERE JC1.rk_台数=1) AS D2 ON D2.检查Id=JC.检查Id 
+			  WHERE D2.小项风险标识!='高风险' AND rk_台次=1 AND JC.小项风险标识='高风险' AND NOT EXISTS(SELECT 1 FROM TisInspectionDetailInfo AS T1 WHERE T1.TisInspectionInfoId=JC.检查ID AND T1.InspectionCheckTime2<@BeginDate AND T1.InspectionResult='高风险')AND JC.安装单位= T.CorrectName AND JC.区域=H.ProjectLocationText) AS 整改台次
+FROM HoistingPolicy AS H
+LEFT JOIN Correct.dbo.Install AS T on T.SystemName=H.InstallationEnterprise
+WHERE H.ProjectLocationText LIKE '浙江省/宁波市/%'
+GROUP BY H.ProjectLocationText,T.CorrectName
+ORDER BY H.ProjectLocationText,T.CorrectName;

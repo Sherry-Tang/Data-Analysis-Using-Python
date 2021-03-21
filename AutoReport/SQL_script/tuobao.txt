@@ -1,0 +1,34 @@
+select 
+h.PropertyRightNo 产权备案编号,
+h.HoistingName 起重机械类型,
+h.ProduceDate 出厂日期,
+DATEDIFF(d, ProduceDate,BeginDate) 出厂天数,
+e.EnterpriseName 总包单位,
+h.ProjectName 项目名称,
+h.Manufacturer 生产厂家,
+right(ProjectLocationText,len(ProjectLocationText)-8) 区域,
+BeginDate 起保日期,
+EndDate 终保日期,
+CASE WHEN h.EndDate<DATEADD(month, -3, concat(year(@EndDate),'-',month(@EndDate),'-','1')) THEN concat(month(DATEADD(month, -3, concat(year(@EndDate),'-',month(@EndDate),'-','1'))),'月前')
+     WHEN h.EndDate<DATEADD(month, -2, concat(year(@EndDate),'-',month(@EndDate),'-','1')) THEN concat(month(DATEADD(month, -3, concat(year(@EndDate),'-',month(@EndDate),'-','1'))),'-',month(DATEADD(month, -2, concat(year(@EndDate),'-',month(@EndDate),'-','1'))),'月')
+	 WHEN h.EndDate<DATEADD(MONTH, -1, concat(year(@EndDate),'-',month(@EndDate),'-','1')) THEN concat(month(DATEADD(month, -2, concat(year(@EndDate),'-',month(@EndDate),'-','1'))),'-',month(DATEADD(month, -1, concat(year(@EndDate),'-',month(@EndDate),'-','1'))),'月')
+	 WHEN h.EndDate<CONCAT(YEAR(@EndDate),'-',month(@EndDate),'-','1') AND MONTH(@EndDate)!=1 AND DAY(@EndDate)!=1 OR DAY(@EndDate)=1 THEN  concat(month(DATEADD(month, -1, concat(year(@EndDate),'-',month(@EndDate),'-','1'))),'-',month(concat(year(@EndDate),'-',month(@EndDate),'-','1')),'月')
+	 WHEN h.EndDate<@EndDate AND MONTH(@EndDate)=1 AND DAY(@EndDate)=1 THEN CONCAT('12','月')
+	 WHEN h.EndDate<@EndDate AND DAY(@EndDate)!=1 THEN concat(month(@EndDate),'月')
+END AS 到期月份,
+CASE WHEN h.EndDate<DATEADD(month, -3, concat(year(@EndDate),'-',month(@EndDate),'-','1')) THEN month(DATEADD(month, -4, concat(year(@EndDate),'-',month(@EndDate),'-','1')))
+     WHEN h.EndDate<DATEADD(month, -2, concat(year(@EndDate),'-',month(@EndDate),'-','1')) THEN month(DATEADD(month, -3, concat(year(@EndDate),'-',month(@EndDate),'-','1')))
+	 WHEN h.EndDate<DATEADD(MONTH, -1, concat(year(@EndDate),'-',month(@EndDate),'-','1')) THEN month(DATEADD(month, -2, concat(year(@EndDate),'-',month(@EndDate),'-','1')))
+	 WHEN h.EndDate<CONCAT(YEAR(@EndDate),'-',month(@EndDate),'-','1') AND MONTH(@EndDate)!=1 AND DAY(@EndDate)!=1 OR DAY(@EndDate)=1 THEN  month(DATEADD(month, -1, concat(year(@EndDate),'-',month(@EndDate),'-','1')))
+	 WHEN h.EndDate<@EndDate AND MONTH(@EndDate)=1 AND DAY(@EndDate)=1 THEN 12
+	 WHEN h.EndDate<@EndDate AND DAY(@EndDate)!=1 THEN month(@EndDate)
+END AS 脱保月份
+from 
+t 
+left join HoistingPolicy h on h.Id=t.Id
+left join Enterprise e on e.Id=h.EnterpriseId
+where rw=1
+and IsWithDraw=0
+and (IsRemoved=0 or IsRemoved is null)
+and (IsBeRelated=0 or IsBeRelated is null)
+and EndDate<@EndDate

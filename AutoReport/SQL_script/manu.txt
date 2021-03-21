@@ -1,0 +1,7 @@
+select  RIGHT(hois.ProjectLocationText,len(hois.ProjectLocationText)-8)AS 区域,crt.CorrectManufacturer 生产厂家, HoistingName 起重机械类型,  count(*) 区域承保设备
+from HoistingPolicy hois 
+left join Correct.dbo.Manufacturer crt on SystemManufacturer = hois.Manufacturer 
+where hois.IsDeleted=0 and hois.IsPolicyFileUploaded=1 and CheckState='PASS' and( hois.IsRemoved=0 or hois.IsRemoved is null or (IsRemoved=1 and RemoveTime>=@EndDate))
+and hois.EndDate>=@EndDate and hois.BeginDate<@EndDate
+group by hois.ProjectLocationText,HoistingName,CorrectManufacturer
+ORDER BY hois.ProjectLocationText,HoistingName,CorrectManufacturer

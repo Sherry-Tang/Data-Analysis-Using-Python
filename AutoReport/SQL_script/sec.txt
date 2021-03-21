@@ -1,0 +1,49 @@
+SELECT H.PropertyRightNo 产权备案编号,
+       H.HoistingName 起重机械类型,
+       P.Payload 起重量,
+       H.ProduceDate 出厂日期,
+       DATEDIFF(d, H.ProduceDate,@EndDate) 年限天,
+       CASE when Payload ='400kN.m-630kN.m'and DATEDIFF(d,ProduceDate,@EndDate)>6*365 then '老机'
+            when Payload ='630kN.m-1250kN.m'and DATEDIFF(d,ProduceDate,@EndDate)>12*365 then '老机'
+            when Payload ='1250kN.m+'and DATEDIFF(d,ProduceDate,@EndDate)>15*365 then '老机'
+            when HoistingName ='施工升降机'and DATEDIFF(d,ProduceDate,@EndDate)>8*365 then '老机'
+            when HoistingName ='物料提升机'and DATEDIFF(d,ProduceDate,@EndDate)>5*365 then '老机'
+	        ELSE '其他'
+      END AS 老机,
+	  case when Payload ='400kN.m-630kN.m'and DATEDIFF(d,ProduceDate,@EndDate)<=3*365 then '0-3年'
+           when Payload ='400kN.m-630kN.m'and DATEDIFF(d,ProduceDate,@EndDate)<=6*365 then '4-6年'
+           when Payload ='400kN.m-630kN.m'and DATEDIFF(d,ProduceDate,@EndDate)>6*365 then '6年以上'
+           when Payload ='630kN.m-1250kN.m'and DATEDIFF(d,ProduceDate,@EndDate)<=3*365 then '0-3年'
+           when Payload ='630kN.m-1250kN.m'and DATEDIFF(d,ProduceDate,@EndDate)<=6*365  then '4-6年'
+           when Payload ='630kN.m-1250kN.m'and DATEDIFF(d,ProduceDate,@EndDate)<=10*365 then '7-10年'
+           when Payload ='630kN.m-1250kN.m'and DATEDIFF(d,ProduceDate,@EndDate)<=12*365 then '10-12年'
+           when Payload ='630kN.m-1250kN.m'and DATEDIFF(d,ProduceDate,@EndDate)>12*365 then '12年以上'
+           when Payload ='1250kN.m+'and DATEDIFF(d,ProduceDate,@EndDate)<=5*364 then '0-5年'
+           when Payload ='1250kN.m+'and DATEDIFF(d,ProduceDate,@EndDate)<=11*365 then '6-11年'
+           when Payload ='1250kN.m+'and DATEDIFF(d,ProduceDate,@EndDate)<=15*365 then '12-15年'
+           when Payload ='1250kN.m+'and DATEDIFF(d,ProduceDate,@EndDate)>15*365 then '15年以上'
+           when HoistingName ='施工升降机'and DATEDIFF(d,ProduceDate,@EndDate)<=3*365 then '0-3年'
+           when HoistingName ='施工升降机'and DATEDIFF(d,ProduceDate,@EndDate)<=5*365 then '4-5年'
+           when HoistingName ='施工升降机'and DATEDIFF(d,ProduceDate,@EndDate)<=8*365 then '6-8年'
+           when HoistingName ='施工升降机'and DATEDIFF(d,ProduceDate,@EndDate)>8*365 then '8年以上'
+           when HoistingName ='物料提升机'and DATEDIFF(d,ProduceDate,@EndDate)<=3*365 then '0-3年'
+           when HoistingName ='物料提升机'and DATEDIFF(d,ProduceDate,@EndDate)<=5*365 then '4-5年'
+           when HoistingName ='物料提升机'and DATEDIFF(d,ProduceDate,@EndDate)>5*365 then '5年以上'
+      end as 年份分段,
+	  T1.小项风险标识 AS 风险标识,
+	  T2.小项检测标识 AS 检测标识,
+      H.Holder_EnterpriseName 总包单位,
+      CorrectName 安装单位,
+      H.ProjectName 项目名称,
+      RIGHT(H.ProjectLocationText,len(H.ProjectLocationText)-8)AS 地区,
+      H.BeginDate 起保日期,    
+	  H.EndDate 终保日期,
+      H.InsurerPolicyNo 保单号,
+      H.Specification 型号
+ FROM HoistingPolicy AS H 
+LEFT JOIN Correct.dbo.Payload AS P on P.Specification=H.Specification
+LEFT JOIN Correct.dbo.Install ins on ins.SystemName=H.InstallationEnterprise
+LEFT JOIN (SELECT JC.保单Id,JC.小项风险标识 FROM 检查截点_2 AS JC WHERE JC.rk_台数=1)AS T1 ON T1.保单Id=H.Id
+LEFT JOIN (SELECT JC.保单Id,JC.小项检测标识 FROM 检测截点 AS JC WHERE JC.rk=1)AS T2 ON T2.保单Id=H.Id
+WHERE H.EndDate>= @EndDate AND H.BeginDate< @EndDate AND H.IsDeleted=0 AND H.IsPolicyFileUploaded=1 AND H.CheckState='PASS'AND (H.IsRemoved=0 OR H.IsRemoved IS NULL OR (H.IsRemoved=1 AND H.RemoveTime>=@EndDate))
+      AND H.ProjectLocationText LIKE '浙江省/宁波市/%'

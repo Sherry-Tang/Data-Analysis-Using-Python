@@ -1,0 +1,9 @@
+CREATE VIEW 检测截点 AS
+SELECT H.Id AS 保单Id,
+	   ROW_NUMBER() OVER (PARTITION BY HoistingPolicyId ORDER BY D.CreateTime DESC ) rk,
+	   D.InspectionResult AS 小项检测标识
+  FROM HoistingPolicy AS H
+LEFT JOIN InspectionInfo AS I ON I.HoistingPolicyId=H.Id
+LEFT JOIN InspectionDetailInfo AS D ON D.InspectionInfoId=I.Id
+WHERE (D.IsDeleted=0 or D.IsDeleted=Null) AND D.InspectionResult IS NOT NULL AND D.ItemType='检测' AND D.CreateTime<@EndDate
+  AND H.IsDeleted=0 AND H.IsPolicyFileUploaded=1 AND H.CheckState='PASS';

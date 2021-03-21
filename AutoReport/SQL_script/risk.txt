@@ -1,0 +1,16 @@
+SELECT RIGHT(H.ProjectLocationText,len(H.ProjectLocationText)-8) AS 地区,
+       h.HoistingName AS 设备类型,
+       I.IndexName as 高风险项目,count(*)数量
+  FROM TisInspectionFormItem AS I
+LEFT JOIN TisInspectionForm AS F ON F.Id=I.TisInspectionFormId
+LEFT JOIN TisInspectionDetailInfo AS D ON D.Id=F.TisInspectionDetailInfoId
+LEFT JOIN TisInspectionInfo AS T ON T.Id=D.TisInspectionInfoId
+LEFT JOIN HoistingPolicy AS H ON H.Id=T.HoistingPolicyId
+WHERE H.IsDeleted=0 and H.IsPolicyFileUploaded=1 and H.CheckState='PASS'
+AND T.IsDeleted=0
+AND D.IsDeleted=0
+AND F.IsDeleted=0
+AND I.IsDeleted=0
+AND I.HasVeto=1 AND I.IsUncheckable=0 AND I.Score='0.00' AND I.IsChecked=1
+AND D.InspectionCheckState='PASS2' AND D.InspectionCheckTime2>= @BeginDate AND D.InspectionCheckTime2<= @EndDate
+GROUP BY RIGHT(H.ProjectLocationText,len(H.ProjectLocationText)-8),H.HoistingName,I.IndexName;

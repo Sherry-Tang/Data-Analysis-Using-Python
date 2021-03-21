@@ -1,0 +1,15 @@
+CREATE VIEW 检测2 AS
+SELECT H.Id AS 保单Id,
+	   T.CorrectName AS 安装单位,
+	   H.Manufacturer AS 生产厂家,
+	   H.HoistingName AS 起重机械,
+	   H.ProjectLocationText AS 区域,
+	   ROW_NUMBER() OVER (PARTITION BY HoistingPolicyId ORDER BY D.CreateTime DESC ) rk,
+	   I.Id AS 检查ID,
+	   D.InspectionResult AS 小项检测标识
+  FROM HoistingPolicy AS H
+LEFT JOIN InspectionInfo AS I ON I.HoistingPolicyId=H.Id
+LEFT JOIN InspectionDetailInfo AS D ON D.InspectionInfoId=I.Id
+LEFT JOIN Correct.dbo.Install AS T on T.SystemName=H.InstallationEnterprise
+WHERE (D.IsDeleted=0 or D.IsDeleted=Null) AND D.InspectionResult IS NOT NULL AND D.ItemType='检测'AND D.CreateTime>=@BeginDate AND D.CreateTime<@EndDate
+  AND H.IsDeleted=0 AND H.IsPolicyFileUploaded=1 AND H.CheckState='PASS';
